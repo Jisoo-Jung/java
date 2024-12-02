@@ -48,8 +48,57 @@ public class MemberDAO {
          }
       }
    }
+//   조회하기(이메일 및 비밀번호) //24.08.05(월) 아이디 찾기를 위한 조회하기 추가 //나머지는 24.08.02에 작성했던 코드
+   public MemberVO select(MemberVO memberVO) {
+	   MemberVO foundMemberVO = null;
+	   String query = "SELECT ID, MEMBER_EMAIL, MEMBER_PASSWORD "
+	   		+ "MEMBER_NAME, MEMBER_AGE, MEMBER_GENDER, CREATED_DATE, UPDATED_DATE "
+			+ "FROM TBL_MEMBER "
+	   		+ "WHERE MEMBER EMAIL = ? AND MEMBER PASSWORD = ?";
+	   
+	   try {
+		   connection = Configuration.getConnection();
+		   preparedStatement = connection.prepareStatement(query);
+		   preparedStatement.setString(1, memberVO.getMemberEmail());
+		   preparedStatement.setString(2, memberVO.getMemberPassword());
+		   
+		   resultSet = preparedStatement.executeQuery();
+		   
+		   if(resultSet.next()) {
+			   foundMemberVO = new MemberVO();
+			   foundMemberVO.setId(resultSet.getLong("ID"));
+			   foundMemberVO.setMemberEmail(resultSet.getString("MEMBER_EMAIL"));
+			   
+			   foundMemberVO.setMemberPassword(resultSet.getString("MEMBER_PASSWORD"));
+			   foundMemberVO.setMemberName(resultSet.getString("MEMBER_NAME"));
+			   foundMemberVO.setMemberAge(resultSet.getInt("MEMBER_AGE"));
+			   foundMemberVO.setMemberGender(resultSet.getInt("MEMBER_GENDER"));
+			   foundMemberVO.setCreatedDate(resultSet.getString("CREATED_DATE"));
+			   foundMemberVO.setUpdatedDate(resultSet.getString("UPDATED_DATE"));
+			   
+		   }
+	} catch (SQLException e) {
+		e.printStackTrace();
+	} finally {
+		try {
+			if(resultSet != null) {
+				resultSet.close();
+			}
+			if(preparedStatement != null) {
+				preparedStatement.close();
+			}
+			if(connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException();
+		}
+	}
+	return foundMemberVO;
+}
    
-//   조회하기
+   
+//   조회하기(아이디)
    public MemberVO select(Long id) {
       MemberVO memberVO = new MemberVO();
       String query = "SELECT ID, MEMBER_EMAIL, MEMBER_PASSWORD, MEMBER_NAME, "
